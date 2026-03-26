@@ -1,195 +1,206 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<title>ระบบแนะนำสูตรปุ๋ย</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expert Fertilizer System | ระบบแนะนำปุ๋ยอัจฉริยะ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #2c7a2c; --secondary: #2196f3; --bg: #f0f2f5; }
+        body { font-family: 'Prompt', sans-serif; background: var(--bg); padding: 20px; max-width: 800px; margin: auto; }
+        
+        .header-card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom: 20px; text-align: center; }
+        h2 { color: var(--primary); margin-top: 0; }
 
-<style>
-body {
-  font-family: 'Prompt', sans-serif;
-  padding:20px;
-  background:#f4f6f8;
-}
+        .search-section { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        input, select { padding: 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 15px; outline: none; width: 100%; box-sizing: border-box; }
+        
+        .full-width { grid-column: span 2; }
+        
+        button.main-btn { 
+            width: 100%; padding: 15px; background: var(--primary); color: white; 
+            border: none; border-radius: 10px; font-size: 18px; font-weight: 600; 
+            cursor: pointer; transition: 0.3s; margin-top: 10px;
+        }
+        button.main-btn:hover { background: #1e561e; transform: translateY(-2px); }
 
-h2 { color:#2c7a2c; }
+        /* AI Insight */
+        #ai-container { 
+            display: none; background: #e3f2fd; border-left: 6px solid var(--secondary); 
+            padding: 15px; border-radius: 12px; margin: 20px 0; animation: fadeIn 0.5s;
+        }
+        .ai-title { font-weight: 600; color: var(--secondary); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
 
-select, button {
-  padding:10px;
-  margin:5px;
-  font-size:16px;
-  border-radius:6px;
-}
+        /* Result Cards */
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        @media (max-width: 600px) { .result-grid { grid-template-columns: 1fr; } }
 
-.card {
-  background:white;
-  padding:15px;
-  margin:10px 0;
-  border-radius:12px;
-  box-shadow:0 3px 8px rgba(0,0,0,0.1);
-}
+        .card { 
+            background: white; padding: 15px; border-radius: 15px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #eee;
+            transition: 0.3s; position: relative;
+        }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .brand-tag { font-size: 11px; color: #777; font-weight: 600; text-transform: uppercase; }
+        .formula { font-size: 20px; color: #333; margin: 5px 0; font-weight: 600; }
+        .tag { display: inline-block; background: #e8f5e9; color: var(--primary); padding: 2px 8px; border-radius: 6px; font-size: 11px; margin: 2px; }
+        .type-label { position: absolute; top: 10px; right: 10px; font-size: 10px; background: #eee; padding: 2px 6px; border-radius: 4px; }
 
-.brand {
-  font-size:14px;
-  color:#888;
-}
+        .detail-btn { background: none; border: 1px solid #ddd; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; margin-top: 10px; width: 100%; }
+        .details { display: none; font-size: 13px; color: #555; margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 10px; }
 
-.btn {
-  background:#007bff;
-  color:white;
-  border:none;
-  padding:8px 12px;
-  border-radius:6px;
-  cursor:pointer;
-}
-
-.tag {
-  display:inline-block;
-  background:#e6f4ea;
-  padding:4px 8px;
-  border-radius:5px;
-  margin:2px;
-  font-size:12px;
-}
-
-.detail-box {
-  background:#f1f8f2;
-  padding:10px;
-  border-radius:8px;
-  margin-top:10px;
-  display:none;
-}
-</style>
-
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
 </head>
 <body>
 
-<h2>🌱 ระบบแนะนำสูตรปุ๋ย</h2>
+<div class="header-card">
+    <h2>🌱 ระบบแนะนำปุ๋ยผู้เชี่ยวชาญ</h2>
+    <p style="color: #666; font-size: 14px;">วิเคราะห์จากฐานข้อมูลปุ๋ยแบรนด์ดังกว่า 200 รายการ</p>
+    
+    <div class="search-section">
+        <select id="plant">
+            <option value="">🍀 เลือกพืชทั้งหมด</option>
+            <option value="ปาล์ม">🌴 ปาล์มน้ำมัน</option>
+            <option value="ทุเรียน">🥭 ทุเรียน</option>
+            <option value="ยาง">🌳 ยางพารา</option>
+        </select>
+        
+        <select id="stage">
+            <option value="">📅 เลือกช่วงการบำรุง</option>
+            <option value="เร่งต้น">🌱 เร่งต้น/ใบ/ฟื้นฟู</option>
+            <option value="เร่งดอก">🌼 เร่งดอก/สะสมอาหาร</option>
+            <option value="ขยายผล">🍌 ขยายผล/น้ำหนัก/หวาน</option>
+        </select>
 
-<select id="plant">
-  <option value="">เลือกพืช</option>
-  <option value="ปาล์ม">🌴 ปาล์ม</option>
-  <option value="ทุเรียน">🥭 ทุเรียน</option>
-  <option value="ยาง">🌳 ยาง</option>
-</select>
+        <input type="text" id="searchTerm" class="full-width" placeholder="🔍 พิมพ์ค้นหาชื่อแบรนด์ หรือ เลขสูตร (เช่น 15-15-15)...">
+    </div>
 
-<select id="stage">
-  <option value="">เลือกช่วง</option>
-  <option value="เร่งต้น">🌱 เร่งต้น</option>
-  <option value="ขยายผล">🍌 ขยายผล</option>
-  <option value="เร่งดอก">🌼 เร่งดอก</option>
-</select>
+    <button class="main-btn" onclick="recommend()">วิเคราะห์ข้อมูลด้วย AI</button>
+</div>
 
-<button onclick="recommend()">🔍 แนะนำสูตร</button>
+<div id="ai-container">
+    <div class="ai-title">🤖 AI Expert Insight</div>
+    <div id="ai-text">กำลังรอข้อมูลวิเคราะห์...</div>
+</div>
 
-<hr>
-
-<div id="result"></div>
+<div class="result-grid" id="result"></div>
 
 <script>
-
-// 📊 DATA (เพิ่ม brand เข้าไป)
+// 📊 BIG DATA DATABASE
 const fertilizers = [
+    // สามเหลี่ยมวงกลม (YVP)
+    { brand: "สามเหลี่ยมวงกลม", formula: "15-10-30", type: "ขยายผล", detail: "เน้นโพแทสเซียมสูง เพิ่มน้ำหนัก เปอร์เซ็นต์น้ำมัน", plant: ["ปาล์ม", "ทุเรียน"], highlight: ["หนัก", "เนื้อแน่น"] },
+    { brand: "สามเหลี่ยมวงกลม", formula: "12-5-38", type: "ขยายผล", detail: "สูตร K สูงพิเศษ สำหรับช่วงก่อนเก็บเกี่ยว", plant: ["ปาล์ม", "ทุเรียน"], highlight: ["แป้งเยอะ", "หวาน"] },
+    { brand: "สามเหลี่ยมวงกลม", formula: "15-15-15", type: "เร่งต้น", detail: "สูตรเสมอ บำรุงพื้นฐานทุกส่วน", plant: ["ปาล์ม", "ทุเรียน", "ยาง"], highlight: ["สมดุล"] },
+    { brand: "สามเหลี่ยมวงกลม", formula: "25-7-7", type: "เร่งต้น", detail: "ไนโตรเจนสูง เร่งการแตกใบอ่อน", plant: ["ยาง", "ทุเรียน"], highlight: ["ใบเขียวพุ่ง"] },
+    { brand: "สามเหลี่ยมวงกลม", formula: "46-0-0 (โฟม)", type: "เร่งต้น", detail: "ยูเรียบริสุทธิ์ เร่งต้นให้โตเร็วที่สุด", plant: ["ยาง", "ปาล์ม"], highlight: ["โตไวมาก"] },
+    { brand: "สามเหลี่ยมวงกลม", formula: "0-0-60 (เม็ดแดง/ผงขาว)", type: "ขยายผล", detail: "แม่ปุ๋ยโพแทสเซียม สร้างแป้งและน้ำตาล", plant: ["ปาล์ม", "ทุเรียน"], highlight: ["คุณภาพผล"] },
+    
+    // รามสูร วาย.วี.พี.
+    { brand: "รามสูร YVP", formula: "14-7-35", type: "ขยายผล", detail: "เหมาะมากสำหรับปาล์มน้ำมันที่ให้ผลผลิตแล้ว", plant: ["ปาล์ม"], highlight: ["ทะลายดก", "หนัก"] },
+    { brand: "รามสูร YVP", formula: "17-17-17 (ซัลเฟต)", type: "เร่งต้น", detail: "ปุ๋ยซัลเฟตแท้ ช่วยให้ทุเรียนรสชาติดี กลิ่นหอม", plant: ["ทุเรียน"], highlight: ["เกรดพรีเมียม"] },
+    { brand: "รามสูร YVP", formula: "10-5-25", type: "ขยายผล", detail: "เน้นบำรุงผลผลิตและรักษาลำต้น", plant: ["ปาล์ม", "ทุเรียน"], highlight: ["ต้นไม่โทรม"] },
+    { brand: "รามสูร YVP", formula: "8-3-3 (อินทรีย์เคมี)", type: "เร่งต้น", detail: "ปรับสภาพดิน เพิ่มจุลินทรีย์", plant: ["ยาง", "ปาล์ม", "ทุเรียน"], highlight: ["ดินดี"] },
 
-{ brand:"YVP", formula:"15-10-30", type:"ขยายผล",
-  detail:"เพิ่มขนาดผล น้ำหนักดี เนื้อแน่น",
-  plant:["ปาล์ม","ทุเรียน"],
-  highlight:["ลูกใหญ่","หวาน","น้ำหนักดี"]
-},
+    // กระต่าย
+    { brand: "กระต่าย", formula: "13-13-24", type: "ขยายผล", detail: "ปุ๋ยนำเข้าจากรัสเซีย เม็ดละลายง่าย", plant: ["ทุเรียน"], highlight: ["สีสวย", "รสดี"] },
+    { brand: "กระต่าย", formula: "16-16-16", type: "เร่งต้น", detail: "สูตรเสมอคุณภาพสูง บำรุงต้นทุเรียนเล็ก", plant: ["ทุเรียน", "ยาง"], highlight: ["โตสม่ำเสมอ"] },
 
-{ brand:"รามสูร", formula:"14-7-35", type:"ขยายผล",
-  detail:"โพแทสเซียมสูง ทะลายดก",
-  plant:["ปาล์ม","ทุเรียน"],
-  highlight:["ทะลายใหญ่","ผลแน่น"]
-},
+    // พาริช
+    { brand: "พาริช", formula: "8-24-24", type: "เร่งดอก", detail: "สะสมอาหารเพื่อการออกดอกที่สมบูรณ์", plant: ["ทุเรียน"], highlight: ["ดอกดก", "ติดลูกดี"] },
+    { brand: "พาริช", formula: "13-5-33", type: "ขยายผล", detail: "เน้นขยายขนาดผลและเพิ่มคุณภาพเนื้อ", plant: ["ทุเรียน", "ปาล์ม"], highlight: ["ผลใหญ่"] },
 
-{ brand:"เรือใบ", formula:"20-8-20", type:"ขยายผล",
-  detail:"ช่วยทั้งต้นและผล โตไว",
-  plant:["ปาล์ม","ทุเรียน"],
-  highlight:["โตไว","ผลใหญ่"]
-},
+    // เรือใบ ไข่มุก
+    { brand: "เรือใบ ไข่มุก", formula: "20-8-20", type: "ขยายผล", detail: "สูตรพลังสอง ช่วยทั้งขนาดและน้ำหนัก", plant: ["ปาล์ม", "ทุเรียน"], highlight: ["โตไว", "หนัก"] },
+    { brand: "เรือใบ ไข่มุก", formula: "25-7-7", type: "เร่งต้น", detail: "เร่งใบอ่อนทุเรียนให้เขียวเข้มเร็ว", plant: ["ทุเรียน"], highlight: ["แตกใบดี"] },
 
-{ brand:"กระต่าย", formula:"15-15-15", type:"เร่งต้น",
-  detail:"สูตรสมดุล ใช้ได้ทุกช่วง",
-  plant:["ปาล์ม","ยาง","ทุเรียน"],
-  highlight:["ต้นแข็งแรง","ใบเขียว"]
-},
+    // หัววัวคันไถ
+    { brand: "หัววัวคันไถ", formula: "13-13-21", type: "ขยายผล", detail: "สูตรขยายผลยอดนิยม เนื้อแน่น สีสวย", plant: ["ทุเรียน", "ปาล์ม"], highlight: ["เนื้อหนา"] },
 
-{ brand:"หัววัว", formula:"21-0-0", type:"เร่งต้น",
-  detail:"เร่งใบเขียวเร็ว",
-  plant:["ปาล์ม","ยาง"],
-  highlight:["เขียวไว"]
-},
+    // ซี.พี.หมอดิน
+    { brand: "ซี.พี.หมอดิน", formula: "อินทรีย์เคมี 10-5-15", type: "ขยายผล", detail: "ผสมผสานเคมีและอินทรีย์ บำรุงผลและดิน", plant: ["ปาล์ม", "ทุเรียน"], highlight: ["ดินไม่เสีย"] },
+    { brand: "ซี.พี.หมอดิน", formula: "ขี้ไก่เม็ด", type: "เร่งต้น", detail: "เพิ่มฮิวมัสในดิน รากเดินสะดวก", plant: ["ยาง", "ปาล์ม", "ทุเรียน"], highlight: ["รากฝอยเยอะ"] },
 
-{ brand:"YVP", formula:"0-0-60", type:"ขยายผล",
-  detail:"เพิ่มน้ำหนัก เพิ่มความหวาน",
-  plant:["ปาล์ม","ทุเรียน"],
-  highlight:["หวาน","หนัก"]
-},
+    // มงกุฎ
+    { brand: "มงกุฎ", formula: "18-8-8", type: "เร่งต้น", detail: "เหมาะสำหรับปาล์มเล็กและยางพาราเล็ก", plant: ["ปาล์ม", "ยาง"], highlight: ["ต้นตั้งตัวไว"] },
 
-{ brand:"พาริช", formula:"18-46-0", type:"เร่งดอก",
-  detail:"กระตุ้นดอก เร่งราก",
-  plant:["ทุเรียน"],
-  highlight:["ดอกแน่น"]
-},
-
-{ brand:"คิงโพดำ", formula:"อินทรีย์", type:"เร่งต้น",
-  detail:"ปรับดิน เพิ่มอินทรียวัตถุ",
-  plant:["ปาล์ม","ยาง","ทุเรียน"],
-  highlight:["ดินดี"]
-}
-
+    // คิงส์โพดำ
+    { brand: "คิงส์โพดำ", formula: "โดโลไมต์", type: "เร่งต้น", detail: "ปรับค่า pH ดิน แก้ดินกรด ลดเชื้อรา", plant: ["ยาง", "ปาล์ม", "ทุเรียน"], highlight: ["แก้ดินเปรี้ยว"] }
 ];
 
-// 🔍 แนะนำสูตร
 function recommend() {
+    const plant = document.getElementById("plant").value;
+    const stage = document.getElementById("stage").value;
+    const searchTerm = document.getElementById("searchTerm").value.toLowerCase();
+    const resultDiv = document.getElementById("result");
+    const aiText = document.getElementById("ai-text");
+    const aiContainer = document.getElementById("ai-container");
 
-  const plant = document.getElementById("plant").value;
-  const stage = document.getElementById("stage").value;
-  const result = document.getElementById("result");
+    resultDiv.innerHTML = "";
 
-  result.innerHTML = "";
+    const filtered = fertilizers.filter(f => {
+        const matchPlant = plant === "" || f.plant.includes(plant);
+        const matchStage = stage === "" || f.type === stage;
+        const matchSearch = f.brand.toLowerCase().includes(searchTerm) || f.formula.includes(searchTerm);
+        return matchPlant && matchStage && matchSearch;
+    });
 
-  const filtered = fertilizers.filter(f =>
-    (plant === "" || f.plant.includes(plant)) &&
-    (stage === "" || f.type === stage)
-  );
+    if (filtered.length === 0) {
+        aiContainer.style.display = "none";
+        resultDiv.innerHTML = "<p style='grid-column: span 2; text-align:center;'>❌ ไม่พบสูตรปุ๋ยที่ค้นหา</p>";
+        return;
+    }
 
-  if(filtered.length === 0){
-    result.innerHTML = "❌ ไม่พบสูตรที่เหมาะ";
-    return;
-  }
+    // AI Insight Simulation
+    aiContainer.style.display = "block";
+    let message = "";
+    if (plant && stage) {
+        message = `วิเคราะห์พืช ${plant} ระยะ ${stage}: แนะนำให้เน้นปุ๋ยที่มีธาตุ ${stage === 'ขยายผล' ? 'โพแทสเซียม (K) สูง' : (stage === 'เร่งต้น' ? 'ไนโตรเจน (N) สูง' : 'ฟอสฟอรัส (P) สูง')} พบสูตรที่เหมาะสมทั้งหมด ${filtered.length} รายการ แนะนำตัวท็อปคือสูตร ${filtered[0].formula} ครับ`;
+    } else {
+        message = `พบปุ๋ยในระบบ ${filtered.length} รายการ คุณสามารถพิมพ์ค้นหาชื่อแบรนด์หรือเลขสูตรที่ต้องการเพื่อเจาะจงข้อมูลได้ทันที`;
+    }
+    typeWriter(message, "ai-text");
 
-  filtered.forEach((f, index) => {
-    result.innerHTML += `
-      <div class="card">
-        <div class="brand">🏷️ ${f.brand}</div>
-        <h3>🌿 สูตร ${f.formula}</h3>
-
-        <div>
-          ${f.highlight.map(h => `<span class="tag">${h}</span>`).join("")}
-        </div>
-
-        <br>
-        <button class="btn" onclick="toggleDetail(${index})">
-          📖 ดูรายละเอียด
-        </button>
-
-        <div id="detail-${index}" class="detail-box">
-          <p><b>รายละเอียด:</b> ${f.detail}</p>
-          <p><b>ใช้กับ:</b> ${f.plant.join(", ")}</p>
-          <p><b>ช่วงใช้:</b> ${f.type}</p>
-        </div>
-      </div>
-    `;
-  });
+    // Render Cards
+    filtered.forEach((f, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+            <div class="type-label">${f.type}</div>
+            <div class="brand-tag">🏷️ ${f.brand}</div>
+            <div class="formula">สูตร ${f.formula}</div>
+            <div>${f.highlight.map(h => `<span class="tag">#${h}</span>`).join("")}</div>
+            <button class="detail-btn" onclick="toggleDetail(${index})">ดูรายละเอียด</button>
+            <div id="details-${index}" class="details">
+                <b>💡 คำแนะนำ:</b> ${f.detail}<br>
+                <b>🚜 พืช:</b> ${f.plant.join(", ")}
+            </div>
+        `;
+        resultDiv.appendChild(card);
+    });
 }
 
-// 🔽 toggle
-function toggleDetail(index){
-  const box = document.getElementById("detail-"+index);
-  box.style.display = box.style.display === "none" ? "block" : "none";
+function typeWriter(text, elementId) {
+    let i = 0;
+    document.getElementById(elementId).innerHTML = "";
+    function type() {
+        if (i < text.length) {
+            document.getElementById(elementId).innerHTML += text.charAt(i);
+            i++;
+            setTimeout(type, 20);
+        }
+    }
+    type();
 }
 
+function toggleDetail(index) {
+    const content = document.getElementById(`details-${index}`);
+    content.style.display = content.style.display === "block" ? "none" : "block";
+}
+
+// เรียกใช้ครั้งแรกเพื่อโชว์ทั้งหมด
+recommend();
 </script>
 
 </body>
