@@ -28,6 +28,11 @@ select, button {
   box-shadow:0 3px 8px rgba(0,0,0,0.1);
 }
 
+.brand {
+  font-size:14px;
+  color:#888;
+}
+
 .btn {
   background:#007bff;
   color:white;
@@ -82,52 +87,52 @@ select, button {
 
 <script>
 
-// 📊 DATA
+// 📊 DATA (เพิ่ม brand เข้าไป)
 const fertilizers = [
 
-{ formula:"15-10-30", type:"ขยายผล",
-  detail:"เพิ่มขนาดผล น้ำหนักดี เนื้อแน่น เหมาะช่วงติดผล",
+{ brand:"YVP", formula:"15-10-30", type:"ขยายผล",
+  detail:"เพิ่มขนาดผล น้ำหนักดี เนื้อแน่น",
   plant:["ปาล์ม","ทุเรียน"],
   highlight:["ลูกใหญ่","หวาน","น้ำหนักดี"]
 },
 
-{ formula:"14-7-35", type:"ขยายผล",
-  detail:"โพแทสเซียมสูง ทะลายดก ผลแน่น",
+{ brand:"รามสูร", formula:"14-7-35", type:"ขยายผล",
+  detail:"โพแทสเซียมสูง ทะลายดก",
   plant:["ปาล์ม","ทุเรียน"],
   highlight:["ทะลายใหญ่","ผลแน่น"]
 },
 
-{ formula:"20-8-20", type:"ขยายผล",
-  detail:"ช่วยทั้งต้นและผล โตไว สมบูรณ์",
+{ brand:"เรือใบ", formula:"20-8-20", type:"ขยายผล",
+  detail:"ช่วยทั้งต้นและผล โตไว",
   plant:["ปาล์ม","ทุเรียน"],
-  highlight:["โตไว","สมบูรณ์"]
+  highlight:["โตไว","ผลใหญ่"]
 },
 
-{ formula:"15-15-15", type:"เร่งต้น",
-  detail:"สูตรสมดุล ใช้ได้ทุกช่วง ฟื้นต้นดี",
+{ brand:"กระต่าย", formula:"15-15-15", type:"เร่งต้น",
+  detail:"สูตรสมดุล ใช้ได้ทุกช่วง",
   plant:["ปาล์ม","ยาง","ทุเรียน"],
   highlight:["ต้นแข็งแรง","ใบเขียว"]
 },
 
-{ formula:"21-0-0", type:"เร่งต้น",
-  detail:"ไนโตรเจนสูง เร่งใบเขียวเร็ว",
+{ brand:"หัววัว", formula:"21-0-0", type:"เร่งต้น",
+  detail:"เร่งใบเขียวเร็ว",
   plant:["ปาล์ม","ยาง"],
   highlight:["เขียวไว"]
 },
 
-{ formula:"0-0-60", type:"ขยายผล",
+{ brand:"YVP", formula:"0-0-60", type:"ขยายผล",
   detail:"เพิ่มน้ำหนัก เพิ่มความหวาน",
   plant:["ปาล์ม","ทุเรียน"],
   highlight:["หวาน","หนัก"]
 },
 
-{ formula:"18-46-0", type:"เร่งดอก",
-  detail:"เร่งดอก กระตุ้นราก",
+{ brand:"พาริช", formula:"18-46-0", type:"เร่งดอก",
+  detail:"กระตุ้นดอก เร่งราก",
   plant:["ทุเรียน"],
   highlight:["ดอกแน่น"]
 },
 
-{ formula:"อินทรีย์", type:"เร่งต้น",
+{ brand:"คิงโพดำ", formula:"อินทรีย์", type:"เร่งต้น",
   detail:"ปรับดิน เพิ่มอินทรียวัตถุ",
   plant:["ปาล์ม","ยาง","ทุเรียน"],
   highlight:["ดินดี"]
@@ -157,7 +162,8 @@ function recommend() {
   filtered.forEach((f, index) => {
     result.innerHTML += `
       <div class="card">
-        <h3>🌿 ${f.formula}</h3>
+        <div class="brand">🏷️ ${f.brand}</div>
+        <h3>🌿 สูตร ${f.formula}</h3>
 
         <div>
           ${f.highlight.map(h => `<span class="tag">${h}</span>`).join("")}
@@ -178,7 +184,7 @@ function recommend() {
   });
 }
 
-// 🔽 เปิด/ปิดรายละเอียด
+// 🔽 toggle
 function toggleDetail(index){
   const box = document.getElementById("detail-"+index);
   box.style.display = box.style.display === "none" ? "block" : "none";
