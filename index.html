@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ระบบแนะนำสูตรปุ๋ย</title>
+
+<style>
+body {
+  font-family: 'Prompt', sans-serif;
+  padding:20px;
+  background:#f4f6f8;
+}
+
+h2 { color:#2c7a2c; }
+
+select, button {
+  padding:10px;
+  margin:5px;
+  font-size:16px;
+  border-radius:6px;
+}
+
+.card {
+  background:white;
+  padding:15px;
+  margin:10px 0;
+  border-radius:12px;
+  box-shadow:0 3px 8px rgba(0,0,0,0.1);
+}
+
+.btn {
+  background:#007bff;
+  color:white;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.tag {
+  display:inline-block;
+  background:#e6f4ea;
+  padding:4px 8px;
+  border-radius:5px;
+  margin:2px;
+  font-size:12px;
+}
+
+.detail-box {
+  background:#f1f8f2;
+  padding:10px;
+  border-radius:8px;
+  margin-top:10px;
+  display:none;
+}
+</style>
+
+</head>
+<body>
+
+<h2>🌱 ระบบแนะนำสูตรปุ๋ย</h2>
+
+<select id="plant">
+  <option value="">เลือกพืช</option>
+  <option value="ปาล์ม">🌴 ปาล์ม</option>
+  <option value="ทุเรียน">🥭 ทุเรียน</option>
+  <option value="ยาง">🌳 ยาง</option>
+</select>
+
+<select id="stage">
+  <option value="">เลือกช่วง</option>
+  <option value="เร่งต้น">🌱 เร่งต้น</option>
+  <option value="ขยายผล">🍌 ขยายผล</option>
+  <option value="เร่งดอก">🌼 เร่งดอก</option>
+</select>
+
+<button onclick="recommend()">🔍 แนะนำสูตร</button>
+
+<hr>
+
+<div id="result"></div>
+
+<script>
+
+// 📊 DATA
+const fertilizers = [
+
+{ formula:"15-10-30", type:"ขยายผล",
+  detail:"เพิ่มขนาดผล น้ำหนักดี เนื้อแน่น เหมาะช่วงติดผล",
+  plant:["ปาล์ม","ทุเรียน"],
+  highlight:["ลูกใหญ่","หวาน","น้ำหนักดี"]
+},
+
+{ formula:"14-7-35", type:"ขยายผล",
+  detail:"โพแทสเซียมสูง ทะลายดก ผลแน่น",
+  plant:["ปาล์ม","ทุเรียน"],
+  highlight:["ทะลายใหญ่","ผลแน่น"]
+},
+
+{ formula:"20-8-20", type:"ขยายผล",
+  detail:"ช่วยทั้งต้นและผล โตไว สมบูรณ์",
+  plant:["ปาล์ม","ทุเรียน"],
+  highlight:["โตไว","สมบูรณ์"]
+},
+
+{ formula:"15-15-15", type:"เร่งต้น",
+  detail:"สูตรสมดุล ใช้ได้ทุกช่วง ฟื้นต้นดี",
+  plant:["ปาล์ม","ยาง","ทุเรียน"],
+  highlight:["ต้นแข็งแรง","ใบเขียว"]
+},
+
+{ formula:"21-0-0", type:"เร่งต้น",
+  detail:"ไนโตรเจนสูง เร่งใบเขียวเร็ว",
+  plant:["ปาล์ม","ยาง"],
+  highlight:["เขียวไว"]
+},
+
+{ formula:"0-0-60", type:"ขยายผล",
+  detail:"เพิ่มน้ำหนัก เพิ่มความหวาน",
+  plant:["ปาล์ม","ทุเรียน"],
+  highlight:["หวาน","หนัก"]
+},
+
+{ formula:"18-46-0", type:"เร่งดอก",
+  detail:"เร่งดอก กระตุ้นราก",
+  plant:["ทุเรียน"],
+  highlight:["ดอกแน่น"]
+},
+
+{ formula:"อินทรีย์", type:"เร่งต้น",
+  detail:"ปรับดิน เพิ่มอินทรียวัตถุ",
+  plant:["ปาล์ม","ยาง","ทุเรียน"],
+  highlight:["ดินดี"]
+}
+
+];
+
+// 🔍 แนะนำสูตร
+function recommend() {
+
+  const plant = document.getElementById("plant").value;
+  const stage = document.getElementById("stage").value;
+  const result = document.getElementById("result");
+
+  result.innerHTML = "";
+
+  const filtered = fertilizers.filter(f =>
+    (plant === "" || f.plant.includes(plant)) &&
+    (stage === "" || f.type === stage)
+  );
+
+  if(filtered.length === 0){
+    result.innerHTML = "❌ ไม่พบสูตรที่เหมาะ";
+    return;
+  }
+
+  filtered.forEach((f, index) => {
+    result.innerHTML += `
+      <div class="card">
+        <h3>🌿 ${f.formula}</h3>
+
+        <div>
+          ${f.highlight.map(h => `<span class="tag">${h}</span>`).join("")}
+        </div>
+
+        <br>
+        <button class="btn" onclick="toggleDetail(${index})">
+          📖 ดูรายละเอียด
+        </button>
+
+        <div id="detail-${index}" class="detail-box">
+          <p><b>รายละเอียด:</b> ${f.detail}</p>
+          <p><b>ใช้กับ:</b> ${f.plant.join(", ")}</p>
+          <p><b>ช่วงใช้:</b> ${f.type}</p>
+        </div>
+      </div>
+    `;
+  });
+}
+
+// 🔽 เปิด/ปิดรายละเอียด
+function toggleDetail(index){
+  const box = document.getElementById("detail-"+index);
+  box.style.display = box.style.display === "none" ? "block" : "none";
+}
+
+</script>
+
+</body>
+</html>
